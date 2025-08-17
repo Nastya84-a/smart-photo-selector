@@ -16,7 +16,12 @@ import json
 import re
 
 class SmartPhotoSelector:
-    """Умный селектор фотографий с автоматическими правилами"""
+    """Умный селектор фотографий с автоматическими правилами
+    
+    Автор: Anastasiia (Nastya84-a)
+    Версия: 1.0.0
+    Дата: 2024
+    """
     
     def __init__(self):
         self.classifier = None
