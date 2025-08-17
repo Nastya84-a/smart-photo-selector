@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+models/
+smart_photos_results/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.webp
+*.json
+*.txt
+*.log
+
+# Keep only source code
+!smart_photo_selector.py
+!README.md
+!requirements.txt
