@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Photo Selector - Upload & Analyze</title>
+    <meta name="description" content="Upload product photos and get AI-powered selection of the best first and second photos">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Upload Section */
+        .upload-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            margin: 30px 0;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* File List */
+        .file-list {
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: #667eea;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-size {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .file-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .file-remove:hover {
+            background: #c82333;
+        }
+
+        /* Analysis Section */
+        .analysis-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Progress */
+        .progress {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        /* Results */
+        .results-section {
+            display: none;
+            margin: 40px 0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .result-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .result-card.best {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .result-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .result-label {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .result-info {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        /* Status Messages */
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🧠 Smart Photo Selector</h1>
+            <p class="subtitle">Upload your product photos and get AI-powered selection of the best first and second photos</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <h2>📁 Upload Product Photos</h2>
+                <p>Select or drag & drop your product photos. The AI will analyze them and select the best ones.</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Click to select photos or drag & drop here</div>
+                    <div class="upload-hint">Supports: JPG, PNG, BMP, TIFF, WebP</div>
+                </div>
+                
+                <input type="file" id="fileInput" multiple accept="image/*">
+                
+                <div class="file-list" id="fileList"></div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section class="analysis-section">
+                <h3>🤖 AI Analysis</h3>
+                <p>Click the button below to start AI-powered photo analysis and selection</p>
+                
+                <button class="analyze-btn" id="analyzeBtn" disabled>
+                    🚀 Analyze Photos & Select Best
+                </button>
+                
+                <div class="progress" id="progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Preparing analysis...</div>
+                </div>
+            </section>
+
+            <!-- Status Messages -->
+            <div class="status" id="status"></div>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection">
+                <h2>🏆 Analysis Results</h2>
+                <p>Here are the best photos selected by AI for your product:</p>
+                
+                <div class="results-grid">
+                    <div class="result-card best">
+                        <div class="result-number">1st</div>
+                        <div class="result-label">Best First Photo</div>
+                        <img class="result-image" id="firstImage" src="" alt="First photo">
+                        <div class="result-info" id="firstInfo">Main product photo - perfect for product card</div>
+                        <button class="download-btn" onclick="downloadImage('first')">📥 Download</button>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-number">2nd</div>
+                        <div class="result-label">Best Second Photo</div>
+                        <img class="result-image" id="secondImage" src="" alt="Second photo">
+                        <div class="result-info" id="secondInfo">Complementary photo - great for additional views</div>
+                        <button class="download-btn" onclick="downloadImage('second')">📥 Download</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let uploadedFiles = [];
+        let analysisResults = null;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const status = document.getElementById('status');
+        const resultsSection = document.getElementById('resultsSection');
+
+        // Event listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        analyzeBtn.addEventListener('click', startAnalysis);
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            
+            if (imageFiles.length === 0) {
+                showStatus('Please select image files only.', 'error');
+                return;
+            }
+
+            uploadedFiles = [...uploadedFiles, ...imageFiles];
+            updateFileList();
+            updateAnalyzeButton();
+            showStatus(`Added ${imageFiles.length} photo(s). Total: ${uploadedFiles.length}`, 'success');
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'file-icon';
+                fileIcon.textContent = '📷';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileSize);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'file-remove';
+                removeBtn.textContent = '❌';
+                removeBtn.onclick = () => removeFile(index);
+                
+                fileItem.appendChild(fileIcon);
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(removeBtn);
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            updateFileList();
+            updateAnalyzeButton();
+            showStatus(`Removed photo. Total: ${uploadedFiles.length}`, 'info');
+        }
+
+        function updateAnalyzeButton() {
+            analyzeBtn.disabled = uploadedFiles.length < 2;
+            if (uploadedFiles.length < 2) {
+                analyzeBtn.textContent = `🚀 Analyze Photos & Select Best (Need at least 2 photos)`;
+            } else {
+                analyzeBtn.textContent = `🚀 Analyze ${uploadedFiles.length} Photos & Select Best`;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        function startAnalysis() {
+            if (uploadedFiles.length < 2) {
+                showStatus('Please upload at least 2 photos for analysis.', 'error');
+                return;
+            }
+
+            // Show progress
+            progress.style.display = 'block';
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '🔄 Analyzing...';
+            
+            // Simulate analysis progress
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 15;
+                if (progressValue > 100) progressValue = 100;
+                
+                progressFill.style.width = progressValue + '%';
+                
+                if (progressValue < 30) {
+                    progressText.textContent = 'Loading AI model...';
+                } else if (progressValue < 60) {
+                    progressText.textContent = 'Analyzing photos...';
+                } else if (progressValue < 90) {
+                    progressText.textContent = 'Selecting best photos...';
+                } else {
+                    progressText.textContent = 'Finalizing results...';
+                }
+                
+                if (progressValue >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(showResults, 500);
+                }
+            }, 200);
+        }
+
+        function showResults() {
+            // Hide progress
+            progress.style.display = 'none';
+            
+            // Generate mock results (in real app, this would come from backend)
+            const firstPhoto = uploadedFiles[0];
+            const secondPhoto = uploadedFiles[1];
+            
+            // Display results
+            document.getElementById('firstImage').src = URL.createObjectURL(firstPhoto);
+            document.getElementById('secondImage').src = URL.createObjectURL(secondPhoto);
+            
+            document.getElementById('firstInfo').textContent = `Main product photo - ${firstPhoto.name}`;
+            document.getElementById('secondInfo').textContent = `Complementary photo - ${secondPhoto.name}`;
+            
+            // Show results section
+            resultsSection.style.display = 'block';
+            
+            // Reset button
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = `🚀 Analyze ${uploadedFiles.length} Photos & Select Best`;
+            
+            showStatus('Analysis complete! Here are your best photos.', 'success');
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadImage(type) {
+            let file;
+            if (type === 'first') {
+                file = uploadedFiles[0];
+            } else {
+                file = uploadedFiles[1];
+            }
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = `${type}_best_${file.name}`;
+            link.click();
+        }
+
+        // Initialize
+        updateAnalyzeButton();
+    </script>
+</body>
+</html>
+
