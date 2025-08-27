@@ -319,7 +319,7 @@ class UniversalSmartSelector:
         print(f"🚀 Универсальный анализ папки: {input_folder}")
         
         # Используем базовый селектор для анализа
-        photo_scores = self.base_selector.analyze_photos(input_folder)
+        photo_scores = self.base_selector.select_best_photos(input_folder, 2)
         
         if not photo_scores:
             print("❌ Не удалось проанализировать фотографии")
