@@ -6,6 +6,9 @@ from universal_smart_selector import UniversalSmartSelector
 
 app = Flask(__name__)
 
+# Увеличиваем лимит загрузки файлов до 500MB
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
+
 @app.route('/')
 def index():
     return '''
@@ -30,7 +33,7 @@ def index():
 </head>
 <body>
     <div class="container">
-        <h1>📸 Smart Photo Selector</h1>
+        <h1>�� Smart Photo Selector</h1>
         
         <div class="upload-section">
             <h3>Upload a folder with photos</h3>
@@ -120,7 +123,7 @@ def index():
                             document.getElementById('resultsContent').innerHTML = data.html;
                             results.style.display = 'block';
                         } else {
-                            alert('Ошибка: ' + data.error);
+                            alert('Error: ' + data.error);
                         }
                     }
                     
@@ -149,7 +152,7 @@ def upload_files():
         files = request.files.getlist('files')
         
         if not files:
-            return jsonify({'success': False, 'error': 'Нет файлов'})
+            return jsonify({'success': False, 'error': 'No files uploaded'})
         
         # Создаем временную папку
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -212,7 +215,7 @@ def upload_files():
                 
                 if ai_results:
                     analysis_result += "✅ AI analysis completed successfully!\n\n"
-                    analysis_result += "🏆 BEST PHOTOGRAPHS:\n"
+                    analysis_result += "�� BEST PHOTOGRAPHS:\n"
                     analysis_result += "=" * 50 + "\n"
                     
                     for i, result in enumerate(ai_results, 1):
@@ -234,7 +237,7 @@ def upload_files():
                         
                         # Преобразуем тип в понятный текст
                         if content_type == 'MAIN_PRODUCT':
-                            type_text = "🎯 Main product photo"
+                            type_text = "�� Main product photo"
                         elif content_type == 'MIXED':
                             type_text = "🎯 Mixed content"
                         elif content_type == 'DETAILS_ONLY':
@@ -245,7 +248,7 @@ def upload_files():
                         analysis_result += f"\n🥇 PHOTO #{i}: {filename}\n"
                         analysis_result += f"   {score_text}\n"
                         analysis_result += f"   {type_text}\n"
-                        analysis_result += f"   📏 Dimensions: {width} × {height}\n"
+                        analysis_result += f"   �� Dimensions: {width} × {height}\n"
                     
                     analysis_result += "\n" + "=" * 50 + "\n"
                     analysis_result += "🎉 AI selected the best photos for your product!\n"
@@ -318,8 +321,9 @@ def upload_files():
             })
         
     except Exception as e:
-        print(f"Ошибка: {str(e)}")
+        print(f"Error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Для локального использования используем localhost
+    app.run(host='localhost', port=5000, debug=True)
