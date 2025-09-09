@@ -33,7 +33,7 @@ def index():
 </head>
 <body>
     <div class="container">
-        <h1>�� Smart Photo Selector</h1>
+        <h1> Smart Photo Selector</h1>
         
         <div class="upload-section">
             <h3>Upload a folder with photos</h3>
